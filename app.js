@@ -4,7 +4,8 @@
 	const bodyParser = require('body-parser');
 	const app = express();
 	const admin = require('./routes/admin');
-	//const mongoose = require('mongoose');
+	const path = require('path');
+	const mongoose = require('mongoose');
 
 //Configurações
 	// Body parser
@@ -14,8 +15,24 @@
 		app.engine('handlebars', handlebars({defaultLayout: 'main'}));
 		app.set('view engine', 'handlebars');
 	// Mongoose
-
+		mongoose.Promise = global.Promise;
+		mongoose.connect("mongodb://localhost/nodeblog",{
+			useUnifiedTopology: true,
+			useNewUrlParser: true
+		}).then(() => {
+			console.log("Conectado ao MongoDB com sucesso");
+		}).catch((erro) => {
+			console.log("Erro ao se conectar ao MongoDB. Erro: " + erro);
+		});
+	// Public
+		app.use(express.static(path.join(__dirname,"public")));
 //Rotas
+	app.get('/', (req, res) => {
+			res.send("Rota principal");
+	});
+	app.get('/posts', (req, res) => {
+			res.send("Lista de posts");
+	});
 	app.use('/admin', admin);
 
 //Outros
