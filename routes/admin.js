@@ -4,6 +4,8 @@
   const mongoose = require('mongoose');
   require("../models/Categoria");
   const Categoria = mongoose.model("Categorias");
+  require("../models/Postagem");
+  const Postagem = mongoose.model("Postagens");
 
 
 // Criando as rotas
@@ -14,7 +16,67 @@
 
   //Rota de Posts
   router.get('/posts', (req, res) => {
-    res.send("Página dos posts");
+    Postagem.find().lean().sort({Data: "desc"}).then((Postagem) => {
+      res.render("admin/postagens", {Postagem: Postagem});
+    }).catch((erro) => {
+      req.flash("error_msg", "Erro ao carregar posts!");
+      res.redirect("/admin");
+    });
+  });
+
+  //Rota do formulário de cadastro de posts
+  router.get('/posts/add', (req, res) => {
+    Categoria.find().lean().then((Categorias) => {
+      res.render("admin/addPost", {Categorias: Categorias});
+    });
+  });
+
+  //Rota de cadastro de posts
+  router.post('/posts/novo', (req, res) => {
+    var erros = [];
+
+    if(!req.body.titulo || typeof req.body.titulo == undefined || req.body.titulo == null){
+      erros.push({text: "Título inválido"});
+    }
+
+    if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null){
+      erros.push({text: "Slug inválido"});
+    }
+
+    if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
+      erros.push({text: "Descrição inválida"});
+    }
+
+    if(!req.body.conteudo || typeof req.body.conteudo == undefined || req.body.conteudo == null){
+      erros.push({text: "Conteúdo inválido"});
+    }
+
+    if(!req.body.categoria == "0"){
+      erros.push({text: "Categoria inválida, registre uma categoria!"});
+    }
+
+    if(erros.length > 0){
+      Categoria.find().lean().then((Categorias) => {
+        res.render("admin/addPost", {erros: erros, Categorias: Categorias});
+      });
+    }else{
+      const novaPostagem = {
+        Titulo: req.body.titulo,
+        Slug: req.body.slug,
+        Descricao: req.body.descricao,
+        Conteudo: req.body.conteudo,
+        Categoria: req.body.categoria
+      }
+
+      new Postagem(novaPostagem).save().then(() => {
+        req.flash("success_msg", "Post criado com sucesso!");
+        res.redirect("/admin/posts");
+      }).catch((erro) => {
+        console.log("Erro post: " + erro);
+        req.flash("error_msg", "Erro ao salvar post, tente novamente!");
+        res.redirect("/admin");
+      });
+    }
   });
 
   //Rota de categorias
@@ -107,7 +169,7 @@
 
   //Rota de exclusão de categorias
   router.get('/categorias/del/:id', (req, res) => {
-    Categoria.remove({_id: req.params.id}).then(() => {
+    Categoria.deleteOne({_id: req.params.id}).then(() => {
       req.flash("success_msg", "Categoria deletada com sucesso!");
       res.redirect("/admin/categorias");
     }).catch((erro) => {

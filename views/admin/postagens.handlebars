@@ -1,0 +1,24 @@
+<h2>Lista das posts</h2>
+<hr>
+<a href="/admin/posts/add"><button type="button" class="btn btn-primary">Novo Post</button></a>
+<br>
+<br>
+{{#each Postagem}}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>{{this.Titulo}} <small>({{this.Slug}})</small></h4>
+            <small>Data de criação: {{this.Data}}</small><br><br>
+
+            <p>{{this.Descricao}}</p>
+
+            <p>{{this.Conteudo}}</p><br><br>
+
+            <div id="actions" style="float: right;">
+                <a href="/admin/categorias/edit/{{_id}}"><button class="btn btn-warning"><img src="https://raw.githubusercontent.com/google/material-design-icons/master/editor/2x_web/ic_mode_edit_black_48dp.png" title="Editar categoria" width="25px"></button></a>
+                <a href="/admin/categorias/del/{{_id}}"><button class="btn btn-danger"><img src="https://raw.githubusercontent.com/google/material-design-icons/master/action/2x_web/ic_delete_black_48dp.png" title="Deletar categoria" width="25px"></button></a>
+            </div>
+        </div>
+    </div>
+{{else}}
+
+{{/each}}
