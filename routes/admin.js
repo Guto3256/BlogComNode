@@ -16,7 +16,8 @@
 
   //Rota de Posts
   router.get('/posts', (req, res) => {
-    Postagem.find().lean().sort({Data: "desc"}).then((Postagem) => {
+    Postagem.find().lean().populate("Categoria").sort({Data: "desc"}).then((Postagem) => {
+      console.log();
       res.render("admin/postagens", {Postagem: Postagem});
     }).catch((erro) => {
       req.flash("error_msg", "Erro ao carregar posts!");
@@ -51,7 +52,7 @@
       erros.push({text: "Conteúdo inválido"});
     }
 
-    if(!req.body.categoria == "0"){
+    if(req.body.categoria == "0"){
       erros.push({text: "Categoria inválida, registre uma categoria!"});
     }
 
@@ -77,6 +78,84 @@
         res.redirect("/admin");
       });
     }
+  });
+
+  //Rota do formulário de edição de postagens
+  router.get('/posts/edit/:id', (req, res) => {
+    Postagem.findOne({_id:req.params.id}).lean().then((Postagem) => {
+      Categoria.find().lean().then((Categorias) => {
+        res.render('admin/editPost', {Postagem: Postagem, Categorias: Categorias});
+      }).catch((erro) => {
+        req.flash("error_msg", "Houve um erro ao listar as categorias!");
+        res.redirect("/admin/posts");
+      })
+    }).catch((erro) => {
+      req.flash("error_msg", "Houve um erro ao carregar o formulário de edição!");
+      res.redirect("/admin/posts");
+    });
+  });
+
+  //Rota de edição de posts
+  router.post('/posts/edit', (req, res) => {
+    var erros = [];
+
+    if(!req.body.titulo || typeof req.body.titulo == undefined || req.body.titulo == null){
+      erros.push({text: "Título inválido"});
+    }
+
+    if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null){
+      erros.push({text: "Slug inválido"});
+    }
+
+    if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
+      erros.push({text: "Descrição inválida"});
+    }
+
+    if(!req.body.conteudo || typeof req.body.conteudo == undefined || req.body.conteudo == null){
+      erros.push({text: "Conteúdo inválido"});
+    }
+
+    if(req.body.categoria == "0"){
+      erros.push({text: "Categoria inválida, registre uma categoria!"});
+    }
+
+    if(erros.length > 0){
+      Categoria.find().lean().then((Categorias) => {
+        res.render("admin/editPost", {erros: erros, Categorias: Categorias});
+      });
+    }else{
+      Postagem.findOne({_id: req.body.id}).then((postagem) => {
+        postagem.Titulo = req.body.titulo;
+        postagem.Slug = req.body.slug;
+        postagem.Descricao = req.body.descricao;
+        postagem.Conteudo = req.body.conteudo;
+        postagem.Categoria = req.body.categoria;
+
+
+        postagem.save().then(() => {
+          req.flash("success_msg", "Post editado com sucesso!");
+          res.redirect("/admin/posts");
+        }).catch((erro) => {
+          req.flash("error_msg", "Erro ao salvar edição do post!");
+          res.redirect("/admin/posts");          
+        });
+      }).catch((erro) => {
+        req.flash("error_msg", "Erro ao editar post!");
+        res.redirect("/admin/posts");
+      });
+    }
+  });
+
+
+  //Rota de exclusão de postagens
+  router.get('/posts/del/:id', (req, res) => {
+    Postagem.deleteOne({_id: req.params.id}).then(() => {
+      req.flash("success_msg", "Post deletado com sucesso!");
+      res.redirect("/admin/posts");
+    }).catch((erro) => {
+      req.flash("success_msg", "Ocorreu um erro ao deletar o post, tente novamente!");
+      res.redirect("/admin/posts");
+    });
   });
 
   //Rota de categorias

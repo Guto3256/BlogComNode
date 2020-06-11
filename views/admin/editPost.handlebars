@@ -1,0 +1,32 @@
+{{#each erros}}
+  <div class="alert alert-danger">{{text}}</div>
+{{else}}
+{{/each}}
+<h2>Editar Post:</h2>
+<div class="card">
+  <div class="card-body">
+    <form method="post" action="/admin/posts/edit">
+      <input type="hidden" name="id" value="{{Postagem._id}}">
+      <label for="titulo">Título:</label>
+      <input type="text" name="titulo" id="titulo" placeholder="Título do post" class="form-control" value="{{Postagem.Titulo}}"><br>
+      <label for="slug">Slug:</label>
+      <input type="text" name="slug" id="slug" placeholder="Slug do post" class="form-control" value="{{Postagem.Slug}}"><br>
+      <label for="descricao">Descrição:</label>
+      <input type="text" name="descricao" id="descricao" placeholder="Descrição do post" class="form-control" value="{{Postagem.Descricao}}"><br>
+      <label for="conteudo">Conteúdo:</label>
+      <textarea name="conteudo" id="conteudo" placeholder="Conteúdo do post" class="form-control">{{Postagem.Conteudo}}</textarea><br>
+      <label for="categoria">Categoria:</label>
+      <select class="form-control" name="categoria" id="categoria">
+          {{#each Categorias}}
+            <option value="{{_id}}">{{this.Nome}}</option>
+          {{else}}  
+            <option value="0">Nenhuma categoria registrada</option>
+          {{/each}}
+      </select><br>
+      <button type="submit" class="btn btn-success" style="float: right;">Editar post</button>
+    </form>
+    <a href="/admin/posts"><button type="submit" class="btn btn-secondary">Cancelar</button></a>
+  </div>
+</div>
+<br>
+
