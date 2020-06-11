@@ -8,6 +8,8 @@
 	const mongoose = require('mongoose');
 	const session = require('express-session');
 	const flash = require('connect-flash');
+	require('./models/Postagem');
+	const Postagem = mongoose.model("Postagens");
 //Configurações
 	// Sessão
 		app.use(session({
@@ -41,12 +43,36 @@
 	// Public
 		app.use(express.static(path.join(__dirname,"public")));
 //Rotas
+	//Rota da página principal
 	app.get('/', (req, res) => {
-			res.send("Rota principal");
+		Postagem.find().lean().populate("Categoria").sort({Data: "desc"}).then((Postagens) => {
+			res.render("index.handlebars", {Postagens: Postagens});
+		}).catch((erro) => {
+			req.flash("error_msg", "Houve um erro ao carregar os posts!");
+			res.redirect("/404");
+		});
 	});
-	app.get('/posts', (req, res) => {
-			res.send("Lista de posts");
+
+	//Rota de leitura do post
+	app.get('/post/:slug', (req, res) => {
+		Postagem.findOne({Slug: req.params.slug}).lean().then((Postagem) => {
+			if(Postagem){
+				res.render("postagem/index.handlebars", {Postagem: Postagem});
+			}else{
+				req.flash("error_msg", "Este post não existe!");
+				res.redirect("/");
+			}
+		}).catch((erro) => {
+			req.flash("error_msg", "Houve um erro ao carregar o post!");
+			res.redirect("/");
+		});
+	})
+
+	//Rotas de erro (404)
+	app.get('/404', (req, res) => {
+		res.send("Erro 404!");
 	});
+	
 	app.use('/admin', admin);
 
 //Outros

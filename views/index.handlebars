@@ -1,0 +1,24 @@
+<div class="jumbotron">
+  <h1 class="display-4">Bem-vindo(a) ao NodeBlog 2.0!</h1>
+  <p class="lead">Esta é a nova versão do nosso blog, feito com Node e MongoDB!</p>
+  <hr class="my-4">
+  <p>Aqui você poderá ler sobre diversos assuntos ou até mesmo criar seus posts :D</p>
+  <a class="btn btn-primary btn-lg" href="#" role="button">Crie uma conta</a>
+</div>
+<hr>
+<h2>Posts recentes:</h2>
+{{#each Postagens}}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>{{this.Titulo}}</h4>
+            <p>Descrição: {{this.Descricao}}</p>
+            <a href="/post/{{this.Slug}}">Ler mais</a>
+            <hr>
+            <small>Categoria: {{this.Categoria.Nome}}</small><br>
+            <small>Data de publicação: {{this.Data}}</small>
+        </div>
+    </div>
+    <br>
+{{else}}
+    <p>Nenhuma postagem registrada</p>
+{{/each}}
