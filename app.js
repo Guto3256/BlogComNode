@@ -10,6 +10,8 @@
 	const flash = require('connect-flash');
 	require('./models/Postagem');
 	const Postagem = mongoose.model("Postagens");
+	require('./models/Categoria');
+	const Categoria = mongoose.model("Categorias");
 //Configurações
 	// Sessão
 		app.use(session({
@@ -73,6 +75,35 @@
 		res.send("Erro 404!");
 	});
 	
+	//Rota da página de categorias
+	app.get('/categorias', (req, res) => {
+		Categoria.find().lean().sort({Data: "desc"}).then((Categorias) => {
+			res.render("categoria/index.handlebars", {Categorias: Categorias});
+		}).catch((erro) => {
+			req.flash("error_msg", "Houve um erro ao carregar as categorias!");
+			res.redirect("/");
+		});
+	});
+
+	//Rota de leitura da categoria
+	app.get('/categorias/:slug', (req, res) => {
+		Categoria.findOne({Slug: req.params.slug}).lean().then((Categoria) => {
+			if(Categoria){
+				Postagem.find({Categoria: Categoria._id}).lean().then((Postagens) => {
+					res.render("categoria/postagens.handlebars", {Categoria: Categoria, Postagens: Postagens});
+				});
+			}else{
+				req.flash("error_msg", "Esta categoria não existe!");
+				res.redirect("/");
+			}
+		}).catch((erro) => {
+			req.flash("error_msg", "Houve um erro ao carregar a categoria!");
+			res.redirect("/");
+		});
+	});
+	
+
+	//Rotas do admin
 	app.use('/admin', admin);
 
 //Outros

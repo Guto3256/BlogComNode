@@ -1,0 +1,16 @@
+<h2>{{Categoria.Nome}}</h2>
+<hr>
+{{#each Postagens}}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>{{this.Titulo}}</h4>
+            <p>Descrição: {{this.Descricao}}</p>
+            <a href="/post/{{this.Slug}}">Ler mais</a>
+            <hr>
+            <small>Data de publicação: {{this.Data}}</small>
+        </div>
+    </div>
+    <br>
+{{else}}
+    <p>Nenhuma postagem dentro da categoria</p>
+{{/each}}
